@@ -9,8 +9,13 @@ import {
   Platform,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { OnboardingIcon } from '../components/OnboardingIcon';
+import { ScreenMockup } from '../components/ScreenMockup';
 
 const { width, height } = Dimensions.get('window');
+
+type IconType = 'rocket' | 'phone' | 'lock' | 'chart' | 'sparkle' | 'refresh' | 'calendar' | 'trending' | 'check';
+type MockupType = 'dashboard' | 'connect' | 'sync' | 'content' | 'schedule' | 'analytics' | null;
 
 interface OnboardingStep {
   id: number;
@@ -18,7 +23,8 @@ interface OnboardingStep {
   subtitle: string;
   description: string;
   instructions: string[];
-  icon: string;
+  icon: IconType;
+  mockup: MockupType;
   color: string;
 }
 
@@ -34,7 +40,8 @@ const onboardingSteps: OnboardingStep[] = [
       'Schedule posts with drag-and-drop calendar',
       'Track analytics and optimize performance',
     ],
-    icon: '🚀',
+    icon: 'rocket',
+    mockup: null,
     color: '#667eea',
   },
   {
@@ -49,7 +56,8 @@ const onboardingSteps: OnboardingStep[] = [
       '4. Click "Add" and connect your Instagram Professional account',
       '5. Make sure your Instagram account is set to Business or Creator',
     ],
-    icon: '📱',
+    icon: 'phone',
+    mockup: 'connect',
     color: '#f093fb',
   },
   {
@@ -67,7 +75,8 @@ const onboardingSteps: OnboardingStep[] = [
       '   • Manage comments',
       '5. Click "Continue" to complete authorization',
     ],
-    icon: '🔐',
+    icon: 'lock',
+    mockup: 'connect',
     color: '#4facfe',
   },
   {
@@ -82,7 +91,8 @@ const onboardingSteps: OnboardingStep[] = [
       '4. InstaAI analyzes your top-performing content',
       '5. You\'ll see insights on what resonates with your audience',
     ],
-    icon: '📊',
+    icon: 'chart',
+    mockup: 'sync',
     color: '#667eea',
   },
   {
@@ -100,7 +110,8 @@ const onboardingSteps: OnboardingStep[] = [
       '   • Caption and hashtags',
       '5. Edit or approve each idea',
     ],
-    icon: '🎬',
+    icon: 'sparkle',
+    mockup: 'content',
     color: '#f093fb',
   },
   {
@@ -116,7 +127,8 @@ const onboardingSteps: OnboardingStep[] = [
       '5. Generate reel with transitions and text overlays',
       '6. Preview and edit before publishing',
     ],
-    icon: '♻️',
+    icon: 'refresh',
+    mockup: 'sync',
     color: '#4facfe',
   },
   {
@@ -132,7 +144,8 @@ const onboardingSteps: OnboardingStep[] = [
       '5. Posts publish automatically at scheduled time',
       '6. Track which posts are scheduled, published, or failed',
     ],
-    icon: '📅',
+    icon: 'calendar',
+    mockup: 'schedule',
     color: '#667eea',
   },
   {
@@ -151,7 +164,8 @@ const onboardingSteps: OnboardingStep[] = [
       '4. Test different posting times',
       '5. Refine your content strategy',
     ],
-    icon: '📈',
+    icon: 'trending',
+    mockup: 'analytics',
     color: '#f093fb',
   },
   {
@@ -168,7 +182,8 @@ const onboardingSteps: OnboardingStep[] = [
       '',
       'Click "Get Started" to access your dashboard!',
     ],
-    icon: '🎉',
+    icon: 'check',
+    mockup: 'dashboard',
     color: '#4facfe',
   },
 ];
@@ -228,9 +243,11 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
             colors={[step.color, step.color + '80']}
             style={styles.iconGradient}
           >
-            <Text style={styles.icon}>{step.icon}</Text>
+            <OnboardingIcon type={step.icon} color="#ffffff" size={80} />
           </LinearGradient>
         </View>
+
+        {step.mockup && <ScreenMockup type={step.mockup} />}
 
         <Text style={styles.title}>{step.title}</Text>
         <Text style={styles.subtitle}>{step.subtitle}</Text>
