@@ -8,6 +8,7 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { apiClient } from '../services/api';
 import type { User } from '../types';
 
@@ -46,6 +47,31 @@ export default function SettingsScreen({ onLogout }: Props) {
           onPress: async () => {
             await apiClient.logout();
             onLogout();
+          },
+        },
+      ]
+    );
+  };
+
+  const handleReplayOnboarding = () => {
+    Alert.alert(
+      'View Onboarding Guide',
+      'This will show the full setup tutorial again. You will need to restart the app.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'View Guide',
+          onPress: async () => {
+            try {
+              await AsyncStorage.removeItem('hasSeenOnboarding');
+              Alert.alert(
+                'Success',
+                'The onboarding guide will show when you restart the app.',
+                [{ text: 'OK' }]
+              );
+            } catch (error) {
+              Alert.alert('Error', 'Failed to reset onboarding status');
+            }
           },
         },
       ]
@@ -102,6 +128,22 @@ export default function SettingsScreen({ onLogout }: Props) {
         </TouchableOpacity>
         <TouchableOpacity style={styles.actionButton}>
           <Text style={styles.actionButtonText}>Content Preferences</Text>
+        </TouchableOpacity>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Help & Support</Text>
+        <TouchableOpacity style={styles.actionButton} onPress={handleReplayOnboarding}>
+          <Text style={styles.actionButtonText}>View Onboarding Guide</Text>
+          <Text style={styles.actionButtonSubtext}>
+            Step-by-step setup tutorial
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.actionButton}>
+          <Text style={styles.actionButtonText}>Help Center</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.actionButton}>
+          <Text style={styles.actionButtonText}>Contact Support</Text>
         </TouchableOpacity>
       </View>
 
@@ -190,6 +232,12 @@ const styles = StyleSheet.create({
   actionButtonText: {
     fontSize: 16,
     color: '#333',
+    fontWeight: '500',
+  },
+  actionButtonSubtext: {
+    fontSize: 13,
+    color: '#666',
+    marginTop: 4,
   },
   logoutButton: {
     backgroundColor: '#F44336',
