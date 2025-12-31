@@ -102,3 +102,59 @@ export interface GeneratedContent {
   predicted_engagement_rate?: number;
   created_at: string;
 }
+
+// Team & Collaboration Types
+export type TeamRole = 'owner' | 'admin' | 'member' | 'viewer';
+export type InviteStatus = 'pending' | 'accepted' | 'declined' | 'expired';
+
+export interface Team {
+  id: number;
+  name: string;
+  description?: string;
+  owner_id: number;
+  is_active: boolean;
+  max_members: number;
+  subscription_tier: string;
+  created_at: string;
+  member_count: number;
+}
+
+export interface TeamMember {
+  id: number;
+  user_id: number;
+  email: string;
+  full_name: string;
+  role: TeamRole;
+  can_manage_content: boolean;
+  can_manage_instagram: boolean;
+  can_view_analytics: boolean;
+  can_invite_members: boolean;
+  joined_at: string;
+}
+
+export interface TeamInvite {
+  id: number;
+  team_id: number;
+  team_name: string;
+  email: string;
+  role: TeamRole;
+  status: InviteStatus;
+  invited_by_email: string;
+  created_at: string;
+  expires_at: string;
+  token?: string;
+}
+
+export interface CreateTeamRequest {
+  name: string;
+  description?: string;
+  max_members?: number;
+}
+
+export interface SendInviteRequest {
+  email: string;
+  role: TeamRole;
+  can_manage_content?: boolean;
+  can_manage_instagram?: boolean;
+  can_view_analytics?: boolean;
+}

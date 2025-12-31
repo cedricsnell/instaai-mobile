@@ -10,6 +10,11 @@ import type {
   InstagramAccount,
   InsightsResponse,
   GeneratedContent,
+  Team,
+  TeamMember,
+  TeamInvite,
+  CreateTeamRequest,
+  SendInviteRequest,
 } from '../types';
 
 const TOKEN_KEY = '@instaai_token';
@@ -256,6 +261,80 @@ class APIClient {
 
   async cancelScheduledPost(scheduleId: number): Promise<void> {
     await this.client.delete(`${API_ENDPOINTS.schedule}/${scheduleId}`);
+  }
+
+  // ========================================
+  // Teams & Collaboration
+  // ========================================
+
+  async getTeams(): Promise<Team[]> {
+    const response = await this.client.get<Team[]>(API_ENDPOINTS.teams);
+    return response.data;
+  }
+
+  async getTeam(teamId: number): Promise<Team> {
+    const response = await this.client.get<Team>(API_ENDPOINTS.team(teamId));
+    return response.data;
+  }
+
+  async createTeam(data: CreateTeamRequest): Promise<Team> {
+    const response = await this.client.post<Team>(API_ENDPOINTS.createTeam, data);
+    return response.data;
+  }
+
+  async updateTeam(
+    teamId: number,
+    data: Partial<CreateTeamRequest>
+  ): Promise<Team> {
+    const response = await this.client.put<Team>(
+      API_ENDPOINTS.team(teamId),
+      data
+    );
+    return response.data;
+  }
+
+  async deleteTeam(teamId: number): Promise<void> {
+    await this.client.delete(API_ENDPOINTS.team(teamId));
+  }
+
+  async sendTeamInvite(
+    teamId: number,
+    data: SendInviteRequest
+  ): Promise<TeamInvite> {
+    const response = await this.client.post<TeamInvite>(
+      API_ENDPOINTS.teamInvite(teamId),
+      data
+    );
+    return response.data;
+  }
+
+  async getTeamMembers(teamId: number): Promise<TeamMember[]> {
+    const response = await this.client.get<TeamMember[]>(
+      API_ENDPOINTS.teamMembers(teamId)
+    );
+    return response.data;
+  }
+
+  async getTeamInvites(teamId: number): Promise<TeamInvite[]> {
+    const response = await this.client.get<TeamInvite[]>(
+      API_ENDPOINTS.teamInvites(teamId)
+    );
+    return response.data;
+  }
+
+  async acceptInvite(token: string): Promise<TeamMember> {
+    const response = await this.client.post<TeamMember>(
+      API_ENDPOINTS.acceptInvite(token)
+    );
+    return response.data;
+  }
+
+  async declineInvite(token: string): Promise<void> {
+    await this.client.post(API_ENDPOINTS.declineInvite(token));
+  }
+
+  async removeTeamMember(teamId: number, userId: number): Promise<void> {
+    await this.client.delete(API_ENDPOINTS.removeTeamMember(teamId, userId));
   }
 }
 
