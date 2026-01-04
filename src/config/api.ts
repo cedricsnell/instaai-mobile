@@ -2,9 +2,19 @@
  * API Configuration for InstaAI Mobile App
  */
 
+// Detect environment - works for both React Native and Web
+const isDevelopment = () => {
+  // For web builds, check hostname
+  if (typeof window !== 'undefined') {
+    return window.location.hostname === 'localhost' ||
+           window.location.hostname === '127.0.0.1';
+  }
+  // For React Native, use __DEV__
+  return typeof __DEV__ !== 'undefined' && __DEV__;
+};
+
 // Backend API base URL
-// Change this to your deployed backend URL in production
-export const API_BASE_URL = __DEV__
+export const API_BASE_URL = isDevelopment()
   ? 'http://localhost:8000/api'  // Local development
   : 'https://instaai-studio.onrender.com/api';  // Production - Render backend
 
