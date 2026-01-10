@@ -7,13 +7,14 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
-  Alert,
   Platform,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import * as WebBrowser from 'expo-web-browser';
 import { apiClient } from '../services/api';
 import type { User, InstagramAccount } from '../types';
 import VideoBackground from '../components/VideoBackground';
+import { showSuccess, showError, showNotification } from '../utils/notification';
 
 export default function HomeScreen() {
   const [user, setUser] = useState<User | null>(null);
@@ -34,10 +35,64 @@ export default function HomeScreen() {
       setUser(userData);
       setAccounts(accountsData);
     } catch (error) {
-      Alert.alert('Error', 'Failed to load data');
+      console.error('Failed to load data:', error);
+      showError('Failed to load data');
     } finally {
       setLoading(false);
       setRefreshing(false);
+    }
+  };
+
+  const handleConnectInstagram = async () => {
+    try {
+      console.log('Starting Instagram OAuth flow...');
+
+      // Get the Instagram authorization URL from backend
+      const { authorization_url } = await apiClient.getInstagramAuthUrl();
+      console.log('Authorization URL:', authorization_url);
+
+      // Open browser for OAuth
+      const result = await WebBrowser.openAuthSessionAsync(
+        authorization_url,
+        Platform.OS === 'web'
+          ? window.location.origin + '/auth/instagram/callback'
+          : 'exp://localhost:8081/--/auth/instagram/callback'
+      );
+
+      console.log('OAuth result:', result);
+
+      if (result.type === 'success' && result.url) {
+        // Extract authorization code from callback URL
+        const url = new URL(result.url);
+        const code = url.searchParams.get('code');
+
+        if (code) {
+          console.log('Got authorization code, connecting account...');
+
+          // Exchange code for access token and connect account
+          await apiClient.connectInstagram(code);
+
+          // Reload data to show connected account
+          await loadData();
+
+          showSuccess('Instagram account connected successfully!');
+        } else {
+          const error = url.searchParams.get('error');
+          const errorDescription = url.searchParams.get('error_description');
+          showError(errorDescription || error || 'Failed to get authorization code');
+        }
+      } else if (result.type === 'cancel') {
+        console.log('User cancelled OAuth');
+      } else {
+        console.error('OAuth failed:', result);
+        showError('Failed to connect Instagram account');
+      }
+    } catch (error: any) {
+      console.error('Instagram connection error:', error);
+      showNotification(
+        'Connection Failed',
+        error.response?.data?.detail || error.message || 'Failed to connect Instagram account'
+      );
     }
   };
 
@@ -285,7 +340,7 @@ export default function HomeScreen() {
                 Link your Instagram Business account to unlock AI-powered insights,
                 automated content creation, and data-driven growth strategies.
               </Text>
-              <TouchableOpacity style={styles.connectButton}>
+              <TouchableOpacity style={styles.connectButton} onPress={handleConnectInstagram}>
                 <LinearGradient
                   colors={['#667eea', '#f093fb']}
                   start={{ x: 0, y: 0 }}
