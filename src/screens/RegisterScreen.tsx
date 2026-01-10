@@ -5,7 +5,6 @@ import {
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  Alert,
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
@@ -18,6 +17,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { AuthStackParamList } from '../navigation/AuthNavigator';
 import GradientText from '../components/GradientText';
 import { signInWithOAuth, type OAuthProvider } from '../services/auth';
+import { showNotification, showSuccess, showError } from '../utils/notification';
 
 type RegisterScreenNavigationProp = NativeStackNavigationProp<AuthStackParamList, 'Register'>;
 
@@ -78,30 +78,26 @@ export default function RegisterScreen({ navigation, onRegisterSuccess }: Props)
 
   const handleRegister = async () => {
     if (!email || !password || !fullName) {
-      Alert.alert('Error', 'Please fill in all required fields');
+      showError('Please fill in all required fields');
       return;
     }
 
     if (password !== confirmPassword) {
-      Alert.alert('Error', 'Passwords do not match');
+      showError('Passwords do not match');
       return;
     }
 
     if (password.length < 8) {
-      Alert.alert('Error', 'Password must be at least 8 characters long');
+      showError('Password must be at least 8 characters long');
       return;
     }
 
     setLoading(true);
     try {
       await apiClient.register(email, password, fullName);
-      Alert.alert(
-        'Success',
-        'Account created successfully!',
-        [{ text: 'OK', onPress: onRegisterSuccess }]
-      );
+      showSuccess('Account created successfully!', onRegisterSuccess);
     } catch (error: any) {
-      Alert.alert(
+      showNotification(
         'Registration Failed',
         error.response?.data?.detail || 'An error occurred during registration'
       );
@@ -120,13 +116,13 @@ export default function RegisterScreen({ navigation, onRegisterSuccess }: Props)
         await apiClient.setToken(result.accessToken);
         onRegisterSuccess();
       } else {
-        Alert.alert(
+        showNotification(
           'Sign Up Failed',
           result.error || `Failed to sign up with ${provider}`
         );
       }
     } catch (error: any) {
-      Alert.alert(
+      showNotification(
         'Sign Up Failed',
         error.message || `An error occurred during ${provider} sign up`
       );
